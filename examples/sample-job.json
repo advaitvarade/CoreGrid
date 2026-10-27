@@ -1,0 +1,10 @@
+{
+  "name": "Squares CSV",
+  "environment": "python-basic",
+  "cpu": 2,
+  "gpu": false,
+  "memoryMb": 512,
+  "timeoutSeconds": 120,
+  "args": ["--rows", "10"],
+  "script": "import argparse, csv, pathlib\np = argparse.ArgumentParser()\np.add_argument('--rows', type=int, default=10)\nn = p.parse_args().rows\nout = pathlib.Path('/job/output/squares.csv')\nwith out.open('w', newline='') as f:\n    w = csv.writer(f)\n    w.writerow(['number', 'square'])\n    for x in range(1, n+1):\n        w.writerow([x, x*x])\nprint('Generated:', out)"
+}

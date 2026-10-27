@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>CoreGrid · Job Console</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand"><span class="brand-icon" aria-hidden="true"><span></span><span></span><span></span><span></span></span><span>CORE<span class="brand-accent">GRID</span></span><span class="brand-tag">LAB RUNNER</span></div>
+      <div class="top-actions"><span id="connection-status" class="connection disconnected"><span class="dot"></span> Not connected</span><button id="signout-btn" class="button button-ghost hidden" type="button">Sign out</button></div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section id="signin-panel" class="login-card">
+      <div class="eyebrow">PRIVATE COMPUTE WORKSPACE</div>
+      <h1>Run Python. <span>Remotely.</span></h1>
+      <p>Connect to your local CoreGrid coordinator. Jobs execute on the worker in isolated Docker containers, and output files come back here.</p>
+      <form id="signin-form" autocomplete="off">
+        <label for="api-key">Development API token</label>
+        <div class="login-row"><input id="api-key" type="password" autocomplete="off" placeholder="Paste COREGRID_KEY" required><button class="button button-primary" type="submit">Connect <span aria-hidden="true">↗</span></button></div>
+        <p class="hint">From Ubuntu: <code>cat ~/.coregrid-dev-token</code> · The token is held only in browser memory, not local storage.</p>
+      </form>
+      <div id="signin-error" class="notice error hidden" role="alert"></div>
+    </section>
+
+    <div id="workspace" class="hidden">
+      <section class="overview">
+        <div class="overview-title"><div class="eyebrow">CONTROL CENTER / DEVELOPMENT</div><h1>Job Console</h1><p>Submit code, monitor execution, and collect artifacts.</p></div>
+        <div class="stat-row">
+          <div class="stat"><span>WORKER</span><strong id="stat-worker">—</strong><small id="worker-sub">Checking status</small></div>
+          <div class="stat"><span>QUEUED</span><strong id="stat-queued">—</strong><small>jobs in queue</small></div>
+          <div class="stat"><span>RUNNING</span><strong id="stat-running">—</strong><small>active jobs</small></div>
+          <div class="stat"><span>COMPLETED</span><strong id="stat-done">—</strong><small>successful jobs</small></div>
+        </div>
+      </section>
+
+      <div id="global-notice" class="notice hidden" role="status"></div>
+
+      <div class="columns">
+        <section class="panel submission">
+          <div class="section-header"><div><span class="eyebrow">01 / SUBMISSION</span><h2>New execution</h2></div><span class="pill">Python .py</span></div>
+          <form id="job-form">
+            <div class="field"><label for="job-name">Job name</label><input id="job-name" required maxlength="80" value="My Python Job"></div>
+            <div class="field"><label for="source-kind">Source type</label><select id="source-kind"><option value="single">Single .py file</option><option value="github">Public GitHub repository</option></select></div>
+            <div id="github-source-fields" class="hidden">
+              <div class="field"><label for="repository-url">GitHub repository URL</label><input id="repository-url" type="url" placeholder="https://github.com/owner/repo"></div>
+              <div class="field"><label for="repository-ref">Branch or tag (optional)</label><input id="repository-ref" placeholder="Default branch"></div>
+              <div class="field"><label for="repository-entry">Python entry point</label><input id="repository-entry" value="main.py" placeholder="src/train.py"></div>
+              <p class="field-note">Public GitHub repositories only. No GitHub login, submodules or automatic pip installs. Write generated files to /job/output.</p>
+            </div>
+            <div id="single-source-fields">
+            <div class="field"><div class="label-row"><label for="file-input">Python source file</label><div><button type="button" id="sample-btn" class="link-button">CPU example</button> <button type="button" id="gpu-sample-btn" class="link-button">GPU example</button></div></div><label class="upload-box" for="file-input"><span class="upload-icon" aria-hidden="true">↑</span><span id="file-label">Choose a .py file from your computer</span><small>Single file · up to 64 KB of source code</small></label><input id="file-input" type="file" accept=".py,text/x-python,text/plain" class="sr-only"></div>
+            <div class="field"><label for="script-editor">Script preview / editor</label><textarea id="script-editor" rows="10" spellcheck="false" placeholder="Upload a .py file or type your Python code here."></textarea></div>
+            </div>
+            <div class="field"><label for="environment">Execution environment</label><select id="environment" required><option value="">Loading environments…</option></select><small id="env-hint" class="field-note">Images are managed by the lab administrator.</small></div>
+            <div class="field"><label for="args">Arguments <span class="optional">optional</span></label><textarea id="args" class="args-box" rows="2" placeholder="--epochs&#10;10"></textarea><small class="field-note">One argument per line. No shell commands or interactive terminal.</small></div>
+            <div class="fieldset"><span class="group-label">RESOURCE LIMITS</span><div class="resource-grid">
+              <div class="field"><label for="cpu">CPU cores</label><select id="cpu"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
+              <div class="field"><label for="memory">Memory</label><select id="memory"><option value="256">256 MB</option><option value="512" selected>512 MB</option><option value="1024">1 GB</option><option value="2048">2 GB</option><option value="4096">4 GB</option></select></div>
+              <div class="field"><label for="timeout">Timeout</label><select id="timeout"><option value="30">30 sec</option><option value="120" selected>2 min</option><option value="300">5 min</option><option value="900">15 min</option><option value="1800">30 min</option></select></div>
+            </div></div>
+            <button id="submit-btn" class="button button-primary submit" type="submit">Submit job <span aria-hidden="true">↗</span></button>
+          </form>
+        </section>
+
+        <section class="panel results">
+          <div class="section-header"><div><span class="eyebrow">02 / EXECUTIONS</span><h2>Your jobs</h2></div><button id="refresh-btn" type="button" class="button button-small button-ghost">↻ Refresh</button></div>
+          <div class="filter-row"><label for="job-filter" class="sr-only">Filter jobs</label><select id="job-filter"><option value="all">All jobs</option><option value="active">Active</option><option value="finished">Finished</option></select><span class="refresh-hint">Auto refresh every 4s</span></div>
+          <div id="job-list" class="job-list"><p class="empty">No jobs submitted yet.</p></div>
+          <div class="detail-panel" id="job-detail">
+            <div class="detail-empty"><span aria-hidden="true">⌁</span><strong>Job details</strong><p>Select a job to view its logs and output files.</p></div>
+          </div>
+        </section>
+      </div>
+      <footer class="footer"><span>COREGRID / LOCAL DEVELOPMENT</span><span>Execution occurs on your configured worker · No browser terminal</span></footer>
+    </div>
+  </main>
+</body>
+</html>

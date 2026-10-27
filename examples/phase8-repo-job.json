@@ -1,0 +1,12 @@
+{
+  "name": "GitHub multi-file example",
+  "repositoryUrl": "https://github.com/REPLACE_WITH_USER/REPLACE_WITH_REPO",
+  "ref": "",
+  "entryPoint": "main.py",
+  "environment": "python-basic",
+  "gpu": false,
+  "cpu": 2,
+  "memoryMb": 512,
+  "timeoutSeconds": 120,
+  "args": []
+}

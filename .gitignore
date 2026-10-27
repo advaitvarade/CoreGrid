@@ -1,0 +1,43 @@
+# Maven build files
+target/
+*.class
+*.jar
+
+# CoreGrid runtime data
+data/
+jobs/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+*token*
+users.properties
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Python generated files
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.ziptarget/
+data/
+jobs/run-*/
+jobs/remote-*/
+*.zip
+.env
+*:Zone.Identifier
